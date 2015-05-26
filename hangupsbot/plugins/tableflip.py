@@ -28,7 +28,7 @@ def _retrieve(url, css_selector, attribute):
 
 def _handle_me_action(bot, event, command):
     if event.text.startswith('/me'):
-        m = re.search('(flip(s|ped)?\s+a\s+(.*\s+)?table.*)', event.text)
+        m = re.search('(flip(s|ped)?(\s+a)?(\s+.*)?\s+table.*)', event.text)
         if m:
             yield from asyncio.sleep(0.2)
             yield from command.run(bot, event, *["tableflip", m.group(0)])
