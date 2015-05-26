@@ -54,11 +54,9 @@ def tableflip(bot, event, *args):
 
         legacy_segments = [hangups.ChatMessageSegment(msg, hangups.SegmentType.TEXT, is_italic=True)]
 
-        print("_tableflip(): uploading {} from {}".format(filename, img_link))
+        print("tableflip(): uploading {} from {}".format(filename, img_link))
         photo_id = yield from bot._client.upload_image(image_data, filename=filename)
 
-        """bot.send_message_parsed(event.conv, msg)"""
         bot.send_message_segments(event.conv.id_, legacy_segments, image_id=photo_id)
     else:
-        bot.send_message_parsed(event.conv, msg)
-        bot.send_html_to_conversation(event.conv_id, "<i>couldn't find a nice picture :( try again</i>")
+        bot.send_message_parsed(event.conv, _("<i>{}</i><br/>(ﾉಥ益ಥ）ﾉ ┻━┻").format(msg))
