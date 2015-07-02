@@ -10,6 +10,125 @@ import hangups
 
 import plugins
 
+
+IITC_DRAWTOOLS_JSON_SCHEMA = {
+    "type": "array",
+    "items": {
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "enum": [ "circle" ]
+                    },
+                    "latLng": {
+                        "type": "object",
+                        "properties": {
+                            "lat": {
+                                "type": "number"
+                            },
+                            "lng": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "radius": {
+                        "type": "number"
+                    },
+                    "color": {
+                        "type": "string",
+                        "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
+                    }
+                },
+                "required": [ "type", "latLng", "radius", "color" ]
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "enum": [ "polygon" ]
+                    },
+                    "latLngs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "lat": {
+                                    "type": "number"
+                                },
+                                "lng": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        "maxItems": 2,
+                        "minItems": 2
+                    },
+                    "color": {
+                        "type": "string",
+                        "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
+                    }
+                },
+                "required": [ "type", "latLngs", "color" ]
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "enum": [ "polyline" ]
+                    },
+                    "latLngs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "lat": {
+                                    "type": "number"
+                                },
+                                "lng": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        "maxItems": 2,
+                        "minItems": 2
+                    },
+                    "color": {
+                        "type": "string",
+                        "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
+                    }
+                },
+                "required": [ "type", "latLngs", "color" ]
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "enum": [ "marker" ]
+                    },
+                    "latLng": {
+                        "type": "object",
+                        "properties": {
+                            "lat": {
+                                "type": "number"
+                            },
+                            "lng": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "color": {
+                        "type": "string",
+                        "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
+                    }
+                },
+                "required": [ "type", "latLng", "color" ]
+            }
+        ]
+    }
+}
+
+
 def _initialise(bot):
     plugins.register_handler(_handle_drawn_items, type="message")
 
@@ -34,11 +153,12 @@ def _handle_drawn_items(bot, event, command):
 
 def _handle_stock_intel_link(bot, event, text):
     url = urlparse(text)
-    if re.match('(?:www\\.)?ingress\\.com(?::\d+)?', url.netloc):
-        print("Found Intel link!")
+    if re.match('(?:www\\.)?ingress\\.com(?::\d+)?', url.netloc) and url.path == '/intel':
+        print("Found stock Intel link!")
         qs = parse_qs(url.query)
 
         if qs['pls']:
+            print("Found drawn items on stock Intel link!")
             pls = qs['pls'][0]
             lines = []
             tmpLines = pls.split('_')
@@ -67,126 +187,9 @@ def _handle_stock_intel_link(bot, event, text):
 
 
 def _handle_iitc_draw_tools_json(bot, event, text):
-    schema = {
-        "type": "array",
-        "items": {
-            "oneOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "enum": [ "circle" ]
-                        },
-                        "latLng": {
-                            "type": "object",
-                            "properties": {
-                                "lat": {
-                                    "type": "number"
-                                },
-                                "lng": {
-                                    "type": "number"
-                                }
-                            }
-                        },
-                        "radius": {
-                            "type": "number"
-                        },
-                        "color": {
-                            "type": "string",
-                            "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
-                        }
-                    },
-                    "required": [ "type", "latLng", "radius", "color" ]
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "enum": [ "polygon" ]
-                        },
-                        "latLngs": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "lat": {
-                                        "type": "number"
-                                    },
-                                    "lng": {
-                                        "type": "number"
-                                    }
-                                }
-                            },
-                            "maxItems": 2,
-                            "minItems": 2
-                        },
-                        "color": {
-                            "type": "string",
-                            "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
-                        }
-                    },
-                    "required": [ "type", "latLngs", "color" ]
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "enum": [ "polyline" ]
-                        },
-                        "latLngs": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "lat": {
-                                        "type": "number"
-                                    },
-                                    "lng": {
-                                        "type": "number"
-                                    }
-                                }
-                            },
-                            "maxItems": 2,
-                            "minItems": 2
-                        },
-                        "color": {
-                            "type": "string",
-                            "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
-                        }
-                    },
-                    "required": [ "type", "latLngs", "color" ]
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "enum": [ "marker" ]
-                        },
-                        "latLng": {
-                            "type": "object",
-                            "properties": {
-                                "lat": {
-                                    "type": "number"
-                                },
-                                "lng": {
-                                    "type": "number"
-                                }
-                            }
-                        },
-                        "color": {
-                            "type": "string",
-                            "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
-                        }
-                    },
-                    "required": [ "type", "latLng", "color" ]
-                }
-            ]
-        }
-    }
-
     try:
         iitc_draw_tools = json.loads(text)
-        validate(iitc_draw_tools, schema)
+        validate(iitc_draw_tools, IITC_DRAWTOOLS_JSON_SCHEMA)
 
         print("Found IITC DrawTools JSON!")
 
@@ -216,17 +219,20 @@ def _handle_iitc_draw_tools_json(bot, event, text):
             if obj['type'] == 'polygon':
                 stockLinks.append([latLngs[length - 1]['lat'], latLngs[length - 1]['lng'], latLngs[0]['lat'], latLngs[0]['lng']])
 
-        lat = bot.get_config_suboption(event.conv.id_, 'intel_map_lat')
-        if lat is None:
-            lat = "<lat>"
-        lng = bot.get_config_suboption(event.conv.id_, 'intel_map_lng')
-        if lng is None:
-            lng = "<lng>"
-        zoom = bot.get_config_suboption(event.conv.id_, 'intel_map_zoom')
-        if zoom is None:
-            zoom = "<zoom>"
+        lat = "<lat>"
+        lng = "<lng>"
+        zoom = "<zoom>"
 
-        pls = '_'.join([','.join(map(lambda y: '%f' % y, x)) for x in stockLinks])
+        intel_map = bot.get_config_suboption(event.conv.id_, 'intel_map')
+        if intel_map is not None:
+            if 'lat' in intel_map.keys() and intel_map['lat']:
+                lat = intel_map['lat']
+            if 'lng' in intel_map.keys() and intel_map['lng']:
+                lng = intel_map['lng']
+            if 'zoom' in intel_map.keys() and intel_map['zoom']:
+                zoom = intel_map['zoom']
+
+        pls = '_'.join([','.join(map(lambda y: '{}'.format(y), x)) for x in stockLinks])
 
         stockUrl = 'https://www.ingress.com/intel?ll={},{}&z={}&pls={}'.format(lat,lng,zoom,pls)
 
